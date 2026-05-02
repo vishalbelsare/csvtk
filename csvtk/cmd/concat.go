@@ -23,6 +23,7 @@ package cmd
 import (
 	"encoding/csv"
 	"runtime"
+	"strconv"
 
 	"github.com/shenwei356/xopen"
 	"github.com/spf13/cobra"
@@ -37,7 +38,7 @@ var concatCmd = &cobra.Command{
 	Long: `concatenate CSV/TSV files by rows
 
 Note that the second and later files are concatenated to the first one,
-so only columns match that of the first files kept.
+so only columns match that of the first files are kept.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -48,6 +49,7 @@ so only columns match that of the first files kept.
 		ignoreCase := getFlagBool(cmd, "ignore-case")
 		keepUnmatched := getFlagBool(cmd, "keep-unmatched")
 		UnmatchedRepl := getFlagString(cmd, "unmatched-repl")
+		printLineNumber := config.ShowRowNumber
 
 		outfh, err := xopen.Wopen(config.OutFile)
 		checkError(err)
@@ -138,13 +140,30 @@ so only columns match that of the first files kept.
 			for i, col := range COLNAMES {
 				colnames[i] = COLNAME2OLDNAME[col]
 			}
+			if printLineNumber {
+				unshift(&colnames, "row")
+			}
+
 			checkError(writer.Write(colnames))
 		}
 
-		row := make([]string, len(COLNAMES))
-		for i := 0; i < len(DF[COLNAMES[0]]); i++ {
-			for j, col = range COLNAMES {
+		ncols := len(COLNAMES)
+		nrows := len(DF[COLNAMES[0]])
+
+		if printLineNumber {
+			ncols++
+		}
+		row := make([]string, ncols)
+
+		for i := 0; i < nrows; i++ {
+			j = 0
+			if printLineNumber {
+				row[0] = strconv.Itoa(i + 1)
+				j = 1
+			}
+			for _, col = range COLNAMES {
 				row[j] = DF[col][i]
+				j++
 			}
 
 			checkError(writer.Write(row))
