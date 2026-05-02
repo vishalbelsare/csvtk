@@ -511,11 +511,14 @@ Usage
 ```text
 concatenate CSV/TSV files by rows
 
-Note that the second and later files are concatenated to the first one,
-so only columns match that of the first files kept.
+If there's only one input file, it will be directly outputted.
+
+If multiple input files are provided, the second and subsequent files will be
+concatenated to the first one by rows. And only columns matching those of the
+first file are kept.
 
 Usage:
-  csvtk concat [flags]
+  csvtk concat [flags] 
 
 Flags:
   -h, --help                    help for concat
@@ -550,6 +553,25 @@ Examples
         22    Rob33        Pike222      rob111     abc
         44    Ken33        Thompson22   ken111     def
 
+1. single input file
+
+        $ csvtk concat names.csv
+        id,first_name,last_name,username
+        11,Rob,Pike,rob
+        2,Ken,Thompson,ken
+        4,Robert,Griesemer,gri
+        1,Robert,Thompson,abc
+        NA,Robert,Abel,123
+
+        # show line number
+        $ csvtk concat names.csv -Z
+        row,id,first_name,last_name,username
+        1,11,Rob,Pike,rob
+        2,2,Ken,Thompson,ken
+        3,4,Robert,Griesemer,gri
+        4,1,Robert,Thompson,abc
+        5,NA,Robert,Abel,123
+        
 1. simple one
 
         $ csvtk concat names.csv names.reorder.csv \
@@ -566,6 +588,15 @@ Examples
         4    Robert       Griesemer   gri
         1    Robert       Thompson    abc
         NA   Robert       Abel        123
+        
+        # show line number
+        $ csvtk concat names.csv names.reorder.csv -Z \
+              | csvtk head -n 3 | csvtk pretty
+        row   id   first_name   last_name   username
+        ---   --   ----------   ---------   --------
+        1     11   Rob          Pike        rob     
+        2     2    Ken          Thompson    ken     
+        3     4    Robert       Griesemer   gri 
 
 1. data with unmatched column names, and ignoring cases
 

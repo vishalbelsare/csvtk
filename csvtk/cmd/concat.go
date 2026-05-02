@@ -37,8 +37,11 @@ var concatCmd = &cobra.Command{
 	Short: "concatenate CSV/TSV files by rows",
 	Long: `concatenate CSV/TSV files by rows
 
-Note that the second and later files are concatenated to the first one,
-so only columns match that of the first files are kept.
+If there's only one input file, it will be directly outputted.
+
+If multiple input files are provided, the second and subsequent files will be
+concatenated to the first one by rows. And only columns matching those of the
+first file are kept.
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -54,6 +57,71 @@ so only columns match that of the first files are kept.
 		outfh, err := xopen.Wopen(config.OutFile)
 		checkError(err)
 		defer outfh.Close()
+
+		writer := csv.NewWriter(outfh)
+		if config.OutTabs || config.Tabs {
+			if config.OutDelimiter == ',' {
+				writer.Comma = '\t'
+			} else {
+				writer.Comma = config.OutDelimiter
+			}
+		} else {
+			writer.Comma = config.OutDelimiter
+		}
+		defer func() {
+			writer.Flush()
+			checkError(writer.Error())
+		}()
+
+		// -----------------------------------------------------------------------------
+
+		if len(files) == 1 {
+			file := files[0]
+			csvReader, err := newCSVReaderByConfig(config, file)
+
+			if err != nil {
+				if err == xopen.ErrNoContent {
+					if config.Verbose {
+						log.Warningf("csvtk concat: skipping empty input file: %s", file)
+					}
+					return
+				}
+				checkError(err)
+			}
+
+			csvReader.Read(ReadOption{
+				FieldStr: "1-",
+			})
+
+			isHeaderLine := !config.NoHeaderRow
+			i := 0
+			for record := range csvReader.Ch {
+				if record.Err != nil {
+					checkError(record.Err)
+				}
+
+				if isHeaderLine {
+					isHeaderLine = false
+					if config.NoOutHeader {
+						continue
+					}
+					if printLineNumber {
+						unshift(&record.All, "row")
+					}
+				} else {
+					i++
+					if printLineNumber {
+						unshift(&record.All, strconv.Itoa(record.Row))
+					}
+				}
+
+				checkError(writer.Write(record.All))
+			}
+
+			return
+		}
+
+		// -----------------------------------------------------------------------------
 
 		var COLNAMES []string
 		var COLNAME2OLDNAME map[string]string
@@ -119,21 +187,6 @@ so only columns match that of the first files are kept.
 			}
 			return
 		}
-
-		writer := csv.NewWriter(outfh)
-		if config.OutTabs || config.Tabs {
-			if config.OutDelimiter == ',' {
-				writer.Comma = '\t'
-			} else {
-				writer.Comma = config.OutDelimiter
-			}
-		} else {
-			writer.Comma = config.OutDelimiter
-		}
-		defer func() {
-			writer.Flush()
-			checkError(writer.Error())
-		}()
 
 		if !config.NoHeaderRow && !config.NoOutHeader {
 			colnames := make([]string, len(COLNAMES))
