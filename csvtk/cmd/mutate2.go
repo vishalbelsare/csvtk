@@ -28,6 +28,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/casbin/govaluate"
 	"github.com/mattn/go-runewidth"
@@ -69,9 +70,10 @@ Supported operators and types:
   Null coalescence: ??
 
 Custom functions:
-  - len(), length of strings, e.g., len($1), len($a), len($1, $2)
+  - len(), characters of strings, e.g., len($1), len($a), len($1, $2).
+    Unicode is supported, e.g., len("沈伟")==2
   - ulen(), length of unicode strings/width of unicode strings rendered
-    to a terminal, e.g., len("沈伟")==6, ulen("沈伟")==4
+    to a terminal, e.g., len("沈伟")==2, ulen("沈伟")==4
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -140,7 +142,7 @@ Custom functions:
 					case float64:
 						n += len(fmt.Sprintf("%f", s.(float64)))
 					case string:
-						n += len(s.(string))
+						n += utf8.RuneCountInString(s.(string))
 					}
 
 				}

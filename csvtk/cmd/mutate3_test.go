@@ -182,7 +182,7 @@ a2,,a2
 				Name:    "Len",
 			},
 			expect: `SD,Len
-沈伟,6
+沈伟,2
 `,
 		},
 

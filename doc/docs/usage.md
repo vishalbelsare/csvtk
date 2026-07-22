@@ -2735,9 +2735,10 @@ Supported operators and types:
   Null coalescence: ??
 
 Custom functions:
-  - len(), length of strings, e.g., len($1), len($a), len($1, $2)
+  - len(), characters of strings, e.g., len($1), len($a), len($1, $2).
+    Unicode is supported, e.g., len("沈伟")==2
   - ulen(), length of unicode strings/width of unicode strings rendered
-    to a terminal, e.g., len("沈伟")==6, ulen("沈伟")==4
+    to a terminal, e.g., len("沈伟")==2, ulen("沈伟")==4
 
 Usage:
   csvtk mutate2 [flags]
@@ -2884,12 +2885,17 @@ Supported Operators:
   Comparison: > >= < <= == !=
   Logical: not ! and && or ||
   String: + contains startsWith endsWith
+          trim trimPrefix trimSuffix upper lower split splitAfter replace
+          repeat indexOf lastIndexOf hasPrefix hasSuffix
+  Membership: [] . ?. in
   Regex: matches
   Range: ..
   Slice: [:]
   Pipe: |
   Ternary conditional: ? :
   Null coalescence: ??
+  Date: now duration date timezone
+  Number: max min abs ceil floor round
 
 Supported Literals:
 
@@ -2905,7 +2911,7 @@ See Expr language definition link for documentation on built-in functions.
 
 Custom functions:
   - ulen(), length of unicode strings/width of unicode strings rendered
-    to a terminal, e.g., len("沈伟")==6, ulen("沈伟")==4
+    to a terminal, e.g., len("沈伟")==2, ulen("沈伟")==4
 
 Usage:
   csvtk mutate3 [flags]
