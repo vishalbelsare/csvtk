@@ -99,8 +99,8 @@ Output: a matrix with the same column and row names. E.g.,
 		}()
 
 		file := files[0]
-		_, _, _, _, data, err := parseCSVfile(cmd, config,
-			file, fieldStr, false, false, true)
+		_, _, data, _, _, err := parseCSVfile(cmd, config,
+			file, fieldStr, false, true, false)
 		if err != nil {
 			if err == xopen.ErrNoContent {
 				if config.Verbose {
