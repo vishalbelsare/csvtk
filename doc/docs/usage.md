@@ -110,6 +110,8 @@
 - [spread](#spread)
 - [transpose](#transpose)
 - [unfold](#unfold)
+- [long2matrix](#long2matrix)
+- [matrix2long](#matrix2long)
 
 **Ordering**
 
@@ -4949,6 +4951,177 @@ Flags:
   -s, --separater string   separater for folded values (default "; ")
 ```
 
+## long2matrix
+
+Usage
+
+```text
+convert a long format to a matrix
+
+Input: a three-column table. E.g.,
+
+    col1   col2   value    
+    A      A      1868883.0
+    A      B      1310746.0
+    B      A      1306936.0
+    B      B      2117177.0
+
+Output: a matrix with the same column and row names. E.g.,
+
+        A           B        
+    A   1868883.0   1310746.0
+    B   1306936.0   2117177.0
+
+Usage:
+  csvtk long2matrix [flags] 
+
+Flags:
+  -B, --clear-bad-value     keep records failing to pass the filter but clear the value
+  -f, --fields strings      the three fields/column to use. e.g., -f 1,2,3 or -f a,b,v (default [1-3])
+  -h, --help                help for long2matrix
+  -N, --keep-non-numberic   keep non-numeric values when filter by --min-value or --max-value
+  -M, --max-value float     only save records with values <= this value (default 1.7976931348623157e+308)
+  -m, --min-value float     only save records with values >= this value (default -1.7976931348623157e+308)
+      --na string           content for filling NA data
+
+```
+
+Examles
+
+```
+$ cat testdata/pairwise-data.tsv 
+A1      A1      0.90
+A1      B1      0.85
+A1      C1      0.45
+A1      D1      0.96
+B1      B1      0.90
+B1      C1      0.85
+B1      D1      0.56
+C1      C1      0.55
+C1      D1      0.45
+D1      D1      0.90
+
+# all data
+$ cat testdata/pairwise-data.tsv | csvtk long2matrix -Ht \
+  | csvtk pretty -t -S round
+╭────┬──────┬──────┬──────┬──────╮
+│    │ A1   │ B1   │ C1   │ D1   │
+├────┼──────┼──────┼──────┼──────┤
+│ A1 │ 0.90 │ 0.85 │ 0.45 │ 0.96 │
+├────┼──────┼──────┼──────┼──────┤
+│ B1 │      │ 0.90 │ 0.85 │ 0.56 │
+├────┼──────┼──────┼──────┼──────┤
+│ C1 │      │      │ 0.55 │ 0.45 │
+├────┼──────┼──────┼──────┼──────┤
+│ D1 │      │      │      │ 0.90 │
+╰────┴──────┴──────┴──────┴──────╯
+
+# keep records failing to pass the filter but clear the value
+$ cat testdata/pairwise-data.tsv | csvtk long2matrix -t --min-value 0.9 --na . \
+  | csvtk pretty -t -S round
+╭────┬────┬──────┬──────╮
+│    │ A1 │ B1   │ D1   │
+├────┼────┼──────┼──────┤
+│ A1 │ .  │ .    │ 0.96 │
+├────┼────┼──────┼──────┤
+│ B1 │ .  │ 0.90 │ .    │
+├────┼────┼──────┼──────┤
+│ D1 │ .  │ .    │ 0.90 │
+╰────┴────┴──────┴──────╯
+
+# keep records even for those failed to pass the filter
+$ cat testdata/pairwise-data.tsv | csvtk long2matrix -t --min-value 0.9 --clear-bad-value \
+  | csvtk pretty -t -S round
+╭────┬────┬──────┬────┬──────╮
+│    │ A1 │ B1   │ C1 │ D1   │
+├────┼────┼──────┼────┼──────┤
+│ A1 │    │      │    │ 0.96 │
+├────┼────┼──────┼────┼──────┤
+│ B1 │    │ 0.90 │    │      │
+├────┼────┼──────┼────┼──────┤
+│ C1 │    │      │    │      │
+├────┼────┼──────┼────┼──────┤
+│ D1 │    │      │    │ 0.90 │
+╰────┴────┴──────┴────┴──────╯
+
+```
+
+## matrix2long
+
+Usage
+
+```text
+convert a matrix to the long format
+
+Input: a matrix with the same column and row names. E.g.,
+
+        A           B        
+    A   1868883.0   1310746.0
+    B   1306936.0   2117177.0
+
+Output: a three-column table. E.g.,
+
+    col1   col2   value    
+    A      A      1868883.0
+    A      B      1310746.0
+    B      A      1306936.0
+    B      B      2117177.0
+
+Usage:
+  csvtk matrix2long [flags] 
+
+Flags:
+  -B, --blanks strings      blank values, case ignored (default [,na,n/a,none,null,.])
+  -n, --colnames strings    column names of the output (3 values required). e.g -n a,b,v (default
+                            [col1,col2,value])
+  -h, --help                help for matrix2long
+  -N, --keep-non-numberic   keep non-numeric values when filter by --min-value or --max-value
+  -M, --max-value float     only show records with values <= this value (default 1.7976931348623157e+308)
+  -m, --min-value float     only show records with values >= this value (default -1.7976931348623157e+308)
+  -b, --skip-blanks         skip records with blank values (defined by --blanks)
+  -s, --skip-same-keys      skip records with the same key names
+```
+
+Examples
+
+```
+# data
+$ cat testdata/pairwise-data.matrix.tsv | csvtk pretty -t -S round
+╭────┬──────┬──────┬──────┬──────╮
+│    │ A1   │ B1   │ C1   │ D1   │
+├────┼──────┼──────┼──────┼──────┤
+│ A1 │ 0.90 │ 0.85 │ 0.45 │ 0.96 │
+├────┼──────┼──────┼──────┼──────┤
+│ B1 │      │ 0.90 │ 0.85 │ 0.56 │
+├────┼──────┼──────┼──────┼──────┤
+│ C1 │      │      │ 0.55 │ 0.45 │
+├────┼──────┼──────┼──────┼──────┤
+│ D1 │      │      │      │ 0.90 │
+╰────┴──────┴──────┴──────┴──────╯
+
+# remove records without values
+$ cat testdata/pairwise-data.matrix.tsv \
+  | csvtk matrix2long -t --skip-blanks
+col1    col2    value
+A1      A1      0.90
+A1      B1      0.85
+A1      C1      0.45
+A1      D1      0.96
+B1      B1      0.90
+B1      C1      0.85
+B1      D1      0.56
+C1      C1      0.55
+C1      D1      0.45
+D1      D1      0.90
+
+# and filter values, and remove the header line
+$ cat testdata/pairwise-data.matrix.tsv \
+  | csvtk matrix2long -t --skip-blanks --min-value 0.9 --delete-header
+A1      A1      0.90
+A1      D1      0.96
+B1      B1      0.90
+D1      D1      0.90
+```
 
 ## uniq
 

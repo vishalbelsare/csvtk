@@ -1,5 +1,8 @@
 - [csvtk v0.38.0](https://github.com/shenwei356/csvtk/releases/tag/v0.38.0)
 [![Github Releases (by Release)](https://img.shields.io/github/downloads/shenwei356/csvtk/v0.38.0/total.svg)](https://github.com/shenwei356/csvtk/releases/tag/v0.38.0)
+    - new commands:
+        - `csvtk long2matrix`: convert the long format to a matrix. [#91](https://github.com/shenwei356/csvtk/issues/91)
+        - `csvtk matrix2long`: convert a matrix to the long format.
     - `csvtk filter/filter2/mutate2/mutate3/sort/summary/round`:
         - fix wrongly converting `.` to the number zero. [#359](https://github.com/shenwei356/csvtk/issues/359)
     - `csvtk cut`:

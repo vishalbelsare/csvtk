@@ -73,7 +73,7 @@ It could save you lots of time in (not) writing Python/R scripts.
 
 ## Subcommands
 
-57 subcommands in total.
+59 subcommands in total.
 
 **Information**
 
@@ -139,6 +139,8 @@ It could save you lots of time in (not) writing Python/R scripts.
 - [`spread`](https://bioinf.shenwei.me/csvtk/usage/#spread): spread a key-value pair across multiple columns, like `tidyr::spread/pivot_wider`
 - [`unfold`](https://bioinf.shenwei.me/csvtk/usage/#unfold): unfold multiple values in cells of a field
 - [`fold`](https://bioinf.shenwei.me/csvtk/usage/#fold): fold multiple values of a field into cells of groups
+- [`long2matrix`](https://bioinf.shenwei.me/csvtk/usage/#long2matrix): convert the long format to a matrix
+- [`matrix2long`](https://bioinf.shenwei.me/csvtk/usage/#matrix2long): convert a matrix to the long format
 
 **Ordering**
 
