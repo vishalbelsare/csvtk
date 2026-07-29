@@ -5076,6 +5076,7 @@ Flags:
                             [col1,col2,value])
   -h, --help                help for matrix2long
   -N, --keep-non-numberic   keep non-numeric values when filter by --min-value or --max-value
+  -S, --keep-same-keys      keep records with the same key names
   -M, --max-value float     only show records with values <= this value (default 1.7976931348623157e+308)
   -m, --min-value float     only show records with values >= this value (default -1.7976931348623157e+308)
   -b, --skip-blanks         skip records with blank values (defined by --blanks)
@@ -5121,6 +5122,26 @@ A1      A1      0.90
 A1      D1      0.96
 B1      B1      0.90
 D1      D1      0.90
+```
+
+```
+# only keep the data on the diagonal.
+cat testdata/pairwise-data.matrix.tsv \
+  | csvtk matrix2long -t -S \
+  | csvtk long2matrix -t \
+  | csvtk pretty -t -S round
+╭────┬──────┬──────┬──────┬──────╮
+│    │ A1   │ B1   │ C1   │ D1   │
+├────┼──────┼──────┼──────┼──────┤
+│ A1 │ 0.90 │      │      │      │
+├────┼──────┼──────┼──────┼──────┤
+│ B1 │      │ 0.90 │      │      │
+├────┼──────┼──────┼──────┼──────┤
+│ C1 │      │      │ 0.55 │      │
+├────┼──────┼──────┼──────┼──────┤
+│ D1 │      │      │      │ 0.90 │
+╰────┴──────┴──────┴──────┴──────╯
+
 ```
 
 ## uniq

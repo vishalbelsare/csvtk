@@ -73,6 +73,10 @@ Output: a three-column table. E.g.,
 			checkError(fmt.Errorf("three column names are needed for the output"))
 		}
 		skipSameKeys := getFlagBool(cmd, "skip-same-keys")
+		keepSameKeys := getFlagBool(cmd, "keep-same-keys")
+		if skipSameKeys && keepSameKeys {
+			checkError(fmt.Errorf("flags -s (--skip-same-keys) and -S (--keep-same-keys) cannot be used together"))
+		}
 		minValue := getFlagFloat64(cmd, "min-value")
 		maxValue := getFlagFloat64(cmd, "max-value")
 		keepNonNumeric := getFlagBool(cmd, "keep-non-numberic")
@@ -150,6 +154,9 @@ Output: a three-column table. E.g.,
 				if skipSameKeys && line[0] == headerRow[j] {
 					continue
 				}
+				if keepSameKeys && line[0] != headerRow[j] {
+					continue
+				}
 
 				if skipBlanks {
 					if _, ok = mBlanks[strings.ToLower(v)]; ok {
@@ -182,6 +189,7 @@ func init() {
 
 	matrix2long.Flags().StringSliceP("colnames", "n", []string{"col1", "col2", "value"}, `column names of the output (3 values required). e.g -n a,b,v`)
 	matrix2long.Flags().BoolP("skip-same-keys", "s", false, `skip records with the same key names`)
+	matrix2long.Flags().BoolP("keep-same-keys", "S", false, `keep records with the same key names`)
 	matrix2long.Flags().BoolP("skip-blanks", "b", false, `skip records with blank values (defined by --blanks)`)
 	matrix2long.Flags().StringSliceP("blanks", "B", []string{"", "na", "n/a", "none", "null", "."}, `blank values, case ignored`)
 
